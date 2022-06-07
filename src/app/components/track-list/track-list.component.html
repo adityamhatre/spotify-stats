@@ -1,6 +1,7 @@
 <div>
-  <track-list-item
-    *ngFor="let track of tracks"
-    [track]="track"
-  ></track-list-item>
+  <ul>
+    <li *ngFor="let track of tracks">
+      <track-list-item [track]="track"></track-list-item>
+    </li>
+  </ul>
 </div>

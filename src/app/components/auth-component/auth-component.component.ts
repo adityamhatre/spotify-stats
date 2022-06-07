@@ -12,7 +12,8 @@ export class AuthComponentComponent implements OnInit {
   constructor(
     private spotifyService: SpotifyService,
     private appStore: AppStore,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -20,10 +21,15 @@ export class AuthComponentComponent implements OnInit {
       const code = params["code"];
       if (!code) return;
 
-      this.spotifyService.exchangeToken(code);
+      this.exchangeToken(code);
     });
   }
 
+  private async exchangeToken(code: string) {
+    await this.spotifyService.exchangeToken(code);
+    this.router.navigate(["/"]);
+  }
+  
   public login() {
     this.spotifyService.authorize();
   }
