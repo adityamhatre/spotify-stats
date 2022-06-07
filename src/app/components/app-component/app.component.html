@@ -1,1 +1,4 @@
-<app-auth-component></app-auth-component>
+<app-auth-component *ngIf="!isLoggedIn; else songList"></app-auth-component>
+<ng-template #songList>
+  <song-list></song-list>
+</ng-template>

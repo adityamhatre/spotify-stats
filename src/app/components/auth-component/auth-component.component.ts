@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { SpotifyService } from "src/app/services/spotify.service";
+import { AppStore } from "src/app/store/app.store";
 
 @Component({
   selector: "app-auth-component",
@@ -10,19 +11,16 @@ import { SpotifyService } from "src/app/services/spotify.service";
 export class AuthComponentComponent implements OnInit {
   constructor(
     private spotifyService: SpotifyService,
-    private route: ActivatedRoute,
+    private appStore: AppStore,
+    private route: ActivatedRoute
   ) {}
 
- 
   ngOnInit(): void {
-    this.route.fragment.subscribe((fragment: any) => {
-      const urlSearchParams = new URLSearchParams(fragment);
-      const accessToken = urlSearchParams.get("access_token");
-      const expires = urlSearchParams.get("expires_in");
+    this.route.queryParams.subscribe((params) => {
+      const code = params["code"];
+      if (!code) return;
 
-      if(accessToken && expires) {
-        this.spotifyService.setAccessToken(accessToken);
-      }
+      this.spotifyService.exchangeToken(code);
     });
   }
 
