@@ -4,7 +4,7 @@ import { last, lastValueFrom, map, Observable } from "rxjs";
 import { PKCEAuth } from "../auth/pkce.service";
 import { Track } from "../models/track.model";
 import { AppStore } from "../store/app.store";
-
+import * as _ from "lodash";
 @Injectable({
   providedIn: "root",
 })
@@ -40,7 +40,6 @@ export class SpotifyService {
       });
   }
 
- 
   private isAccessTokenExpired(): boolean {
     const expires = localStorage.getItem("expiresAt") ?? "0";
     return Date.now() > parseInt(expires);
@@ -84,6 +83,7 @@ export class SpotifyService {
                 id: item.track.id,
                 name: item.track.name,
                 href: item.track.preview_url,
+                art: (_.maxBy(item.track.album.images, "width") as any)["url"],
               };
             })
           )

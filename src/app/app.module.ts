@@ -8,8 +8,9 @@ import { AuthComponentComponent } from "./components/auth-component/auth-compone
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { MatButtonModule } from "@angular/material/button";
 import { SongListComponent } from "./components/track-list/track-list.component";
-import { SongListItemComponent } from "./components/song-list-item/track-list-item.component";
+import { SongListItemComponent } from "./components/track-list-item/track-list-item.component";
 import { AuthInterceptor } from "./auth/auth.interceptor";
+import { MatCardModule } from "@angular/material/card";
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { AuthInterceptor } from "./auth/auth.interceptor";
     MatButtonModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    MatCardModule,
   ],
   providers: [
     {
