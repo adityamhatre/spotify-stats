@@ -9,7 +9,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { MatButtonModule } from "@angular/material/button";
 import { SongListComponent } from "./components/track-list/track-list.component";
 import { SongListItemComponent } from "./components/song-list-item/track-list-item.component";
-import { AuthInterceptor } from "./auth.interceptor";
+import { AuthInterceptor } from "./auth/auth.interceptor";
 
 @NgModule({
   declarations: [
