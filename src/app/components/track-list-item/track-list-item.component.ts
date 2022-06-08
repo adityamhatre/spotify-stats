@@ -10,9 +10,7 @@ export class SongListItemComponent implements OnInit {
   @Input() public track: Track = {} as Track;
   constructor() {}
 
-  ngOnInit(): void {
-    console.log(this.track)
-  }
+  ngOnInit(): void {}
 
   public open() {
     window.open(this.track.href, "_blank");

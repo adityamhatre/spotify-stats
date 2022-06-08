@@ -1,3 +1,9 @@
-<div>
-  <track-list-item *ngFor="let track of tracks" [track]="track"></track-list-item>
+<div class="root">
+  <div class="track-list">
+    <track-list-item
+      *ngFor="let track of tracks"
+      [track]="track"
+    ></track-list-item>
+  </div>
+  <button class="load-more-btn" (click)="loadMore()">Load more</button>
 </div>

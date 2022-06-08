@@ -1,10 +1,9 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { last, lastValueFrom, map, Observable } from "rxjs";
+import * as _ from "lodash";
+import { lastValueFrom, map, tap } from "rxjs";
 import { PKCEAuth } from "../auth/pkce.service";
 import { Track } from "../models/track.model";
-import { AppStore } from "../store/app.store";
-import * as _ from "lodash";
 @Injectable({
   providedIn: "root",
 })
@@ -12,32 +11,31 @@ export class SpotifyService {
   static readonly CLIENT_ID = "54c5925b30db42f891deae28c5a83734";
   static readonly ACCOUNTS_SERVICE_URL = "https://accounts.spotify.com";
   static readonly API_URL = "https://api.spotify.com/v1";
-  constructor(
-    private httpClient: HttpClient,
-    private appStore: AppStore,
-    private pkceService: PKCEAuth
-  ) {}
+  static readonly PAGE_SIZE = 20;
 
-  private redirectToSpotifyAuthorizeEndpoint() {
+  private hasMoreLikedSongs = true;
+
+  constructor(private httpClient: HttpClient, private pkceService: PKCEAuth) {}
+
+  private async redirectToSpotifyAuthorizeEndpoint() {
     const codeVerifier = this.pkceService.generateRandomString(64);
 
-    this.pkceService
-      .generateCodeChallenge(codeVerifier)
-      .then((code_challenge) => {
-        window.localStorage.setItem("code_verifier", codeVerifier);
+    const code_challenge = await this.pkceService.generateCodeChallenge(
+      codeVerifier
+    );
 
-        window.location.href = this.pkceService.generateUrlWithSearchParams(
-          "https://accounts.spotify.com/authorize",
-          {
-            response_type: "code",
-            client_id: SpotifyService.CLIENT_ID,
-            scope: "user-read-private user-read-email user-library-read",
-            code_challenge_method: "S256",
-            code_challenge,
-            redirect_uri: "http://localhost:4200",
-          }
-        );
-      });
+    window.localStorage.setItem("code_verifier", codeVerifier);
+    window.location.href = this.pkceService.generateUrlWithSearchParams(
+      "https://accounts.spotify.com/authorize",
+      {
+        response_type: "code",
+        client_id: SpotifyService.CLIENT_ID,
+        scope: "user-read-private user-read-email user-library-read",
+        code_challenge_method: "S256",
+        code_challenge,
+        redirect_uri: "http://localhost:4200",
+      }
+    );
   }
 
   private isAccessTokenExpired(): boolean {
@@ -68,14 +66,20 @@ export class SpotifyService {
   }
 
   public async getLikedTracks(offset: number = 0): Promise<Track[]> {
+    if (!this.hasMoreLikedSongs) return [];
+
     const tracks: Track[] = await lastValueFrom(
       this.httpClient
         .get(`${SpotifyService.API_URL}/me/tracks`, {
           params: {
+            limit: SpotifyService.PAGE_SIZE,
             offset,
           },
         })
         .pipe(
+          tap((data: any) => {
+            this.hasMoreLikedSongs = !!data.next;
+          }),
           map((data: any) => data.items),
           map((items: any[]) =>
             items.map((item: any) => {

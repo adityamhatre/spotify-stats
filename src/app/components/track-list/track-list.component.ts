@@ -9,6 +9,7 @@ import { SpotifyService } from "src/app/services/spotify.service";
 })
 export class SongListComponent implements OnInit {
   constructor(private spotifyService: SpotifyService) {}
+  private currentOffset = 0;
 
   public tracks: Track[] = [];
 
@@ -17,7 +18,12 @@ export class SongListComponent implements OnInit {
   }
 
   async loadTracks() {
-    const tracks = await this.spotifyService.getLikedTracks();
+    const tracks = await this.spotifyService.getLikedTracks(this.currentOffset);
     this.tracks = this.tracks.concat(tracks);
+  }
+
+  public loadMore() {
+    this.currentOffset += SpotifyService.PAGE_SIZE;
+    this.loadTracks();
   }
 }
