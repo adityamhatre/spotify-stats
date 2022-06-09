@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import { lastValueFrom, map, tap } from "rxjs";
 import { PKCEAuth } from "../auth/pkce.service";
 import { Track } from "../models/track.model";
+import { AppStore } from "../store/app.store";
 @Injectable({
   providedIn: "root",
 })
@@ -15,7 +16,11 @@ export class SpotifyService {
 
   private hasMoreLikedSongs = true;
 
-  constructor(private httpClient: HttpClient, private pkceService: PKCEAuth) {}
+  constructor(
+    private httpClient: HttpClient,
+    private pkceService: PKCEAuth,
+    private appStore: AppStore
+  ) {}
 
   private async redirectToSpotifyAuthorizeEndpoint() {
     const codeVerifier = this.pkceService.generateRandomString(64);
@@ -66,7 +71,10 @@ export class SpotifyService {
   }
 
   public async getLikedTracks(offset: number = 0): Promise<Track[]> {
-    if (!this.hasMoreLikedSongs) return [];
+    if (!this.hasMoreLikedSongs) {
+      this.appStore.allGenresLoaded();
+      return [];
+    }
 
     const tracks: Track[] = await lastValueFrom(
       this.httpClient
@@ -88,11 +96,21 @@ export class SpotifyService {
                 name: item.track.name,
                 href: item.track.preview_url,
                 art: (_.maxBy(item.track.album.images, "width") as any)["url"],
+                artists: item.track.artists,
               };
             })
           )
         )
     );
     return tracks;
+  }
+
+  public async getGenre(artistId: string): Promise<string[]> {
+    const genres = await lastValueFrom(
+      this.httpClient
+        .get(`${SpotifyService.API_URL}/artists/${artistId}`)
+        .pipe(map((data: any) => data.genres))
+    );
+    return genres;
   }
 }
